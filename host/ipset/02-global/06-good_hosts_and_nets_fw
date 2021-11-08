@@ -1,0 +1,37 @@
+# 
+# Rule 6 (global)
+# 
+echo "Rule 6 (global)"
+# 
+# Create and use "good-nets" and "good-hosts" ipset DBs
+# ipset create good-nets hash:net
+# ipset create good-hosts hash:ip
+# 
+# Loop through interfaces and IPs and add each IP:
+# ipset add good-nets 1.1.1.1/24
+# ipset add good-nets 2.2.2.2/24
+# ipset add good-hosts 3.3.3.3
+# Good hosts and nets can get to fw on some ports: 22, 2222, 80, 443, 4464  
+$IPTABLES -w -N GoodHostsAndNets.0
+$IPTABLES -w -A FORWARD -p tcp -m tcp  --dport 22  -m conntrack --ctstate NEW  -j GoodHostsAndNets.0
+$IPTABLES -w -A FORWARD -p tcp -m tcp  --dport 2222  -m conntrack --ctstate NEW  -j GoodHostsAndNets.0
+$IPTABLES -w -A FORWARD -p tcp -m tcp  --dport 80  -m conntrack --ctstate NEW  -j GoodHostsAndNets.0
+$IPTABLES -w -A FORWARD -p tcp -m tcp  --dport 443  -m conntrack --ctstate NEW  -j GoodHostsAndNets.0
+$IPTABLES -w -A FORWARD -p tcp -m tcp  --dport 4464  -m conntrack --ctstate NEW  -j GoodHostsAndNets.0
+$IPTABLES -w -N GoodHostsAndNets.1
+$IPTABLES -w -A GoodHostsAndNets.0  -m set --match-set fw-ip dst -j GoodHostsAndNets.1
+$IPTABLES -w -N RULE_6
+$IPTABLES -w -A GoodHostsAndNets.1  -m set --match-set good-nets src   -j RULE_6
+$IPTABLES -w -A GoodHostsAndNets.1  -m set --match-set good-hosts src   -j RULE_6
+$IPTABLES -w -N GoodHostsAndNets.2
+$IPTABLES -w -A INPUT -p tcp -m tcp  --dport 22  -m conntrack --ctstate NEW  -j GoodHostsAndNets.2
+$IPTABLES -w -A INPUT -p tcp -m tcp  --dport 2222  -m conntrack --ctstate NEW  -j GoodHostsAndNets.2
+$IPTABLES -w -A INPUT -p tcp -m tcp  --dport 80  -m conntrack --ctstate NEW  -j GoodHostsAndNets.2
+$IPTABLES -w -A INPUT -p tcp -m tcp  --dport 443  -m conntrack --ctstate NEW  -j GoodHostsAndNets.2
+$IPTABLES -w -A INPUT -p tcp -m tcp  --dport 4464  -m conntrack --ctstate NEW  -j GoodHostsAndNets.2
+$IPTABLES -w -A GoodHostsAndNets.2  -m set --match-set good-nets src -j RULE_6
+$IPTABLES -w -A GoodHostsAndNets.2  -m set --match-set good-hosts src -j RULE_6
+$IPTABLES -w -A RULE_6  -m limit --limit 20/min -j LOG  --log-level info --log-prefix "RULE 6 -- ACCEPT "
+$IPTABLES -w -A RULE_6  -j ACCEPT
+## End of 06-good_hosts_and_nets
+

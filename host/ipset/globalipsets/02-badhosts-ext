@@ -1,0 +1,6 @@
+## This is all external trusted hosts
+## Note: All comments are ignored by the compile script.
+# Bad Host One
+10.30.40.51
+# Bad Host Two
+10.30.40.52

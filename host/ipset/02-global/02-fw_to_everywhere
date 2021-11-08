@@ -1,0 +1,21 @@
+# 
+# Rule 2 (global)
+# 
+echo "Rule 2 (global)"
+# 
+# Create and use "fw-ip" ipset
+# ipset create fw-ip hash:ip
+# 
+# Loop through interfaces and IPs and add each IP:
+# ipset add fw-self 1.1.1.1
+# ipset add fw-self 2.2.2.2
+#
+# FW can go everywhere
+$IPTABLES -w -N RULE_2
+$IPTABLES -w -A INPUT  -m set --match-set fw-ip src  -m conntrack --ctstate NEW  -j RULE_2
+$IPTABLES -w -A FORWARD  -m set --match-set fw-ip src -m conntrack --ctstate NEW  -j RULE_2
+$IPTABLES -w -A OUTPUT  -m conntrack --ctstate NEW  -j RULE_2
+$IPTABLES -w -A RULE_2  -m limit --limit 20/min -j LOG  --log-level info --log-prefix "RULE 2 -- ACCEPT "
+$IPTABLES -w -A RULE_2  -j ACCEPT
+## End of 02-fw_to_everywhere
+

@@ -1,0 +1,14 @@
+# 
+# Rule 99 (global)
+# 
+echo "Rule 99 (global)"
+# 
+# Last catch-all rule
+$IPTABLES -w -N RULE_99
+$IPTABLES -w -A OUTPUT  -j RULE_99
+$IPTABLES -w -A INPUT  -j RULE_99
+$IPTABLES -w -A FORWARD  -j RULE_99
+$IPTABLES -w -A RULE_99  -m limit --limit 20/min -j LOG  --log-level info --log-prefix "RULE 99 -- DENY "
+$IPTABLES -w -A RULE_99  -j DROP
+
+

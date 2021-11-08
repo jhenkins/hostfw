@@ -1,0 +1,33 @@
+# 
+# Rule 3 (global)
+# 
+echo "Rule 3 (global)"
+# 
+# Local services available over the internet
+# 
+# Public ports: 80, 443, 4464  
+$IPTABLES -w -N LocalServices.0
+
+
+$IPTABLES -w -A INPUT -p tcp -m tcp  -m multiport  --dports 80,443,4464  -m conntrack --ctstate NEW  -j ACCEPT
+$IPTABLES -w -A OUTPUT -p tcp -m tcp  -m multiport  --dports 80,443,4464  -m conntrack --ctstate NEW  -j LocalServices.0
+
+$IPTABLES -w -A FORWARD -p tcp -m tcp  --dport 80  -m conntrack --ctstate NEW  -j LocalServices.0
+$IPTABLES -w -A FORWARD -p tcp -m tcp  --dport 443  -m conntrack --ctstate NEW  -j LocalServices.0
+$IPTABLES -w -A FORWARD -p tcp -m tcp  --dport 4464  -m conntrack --ctstate NEW  -j LocalServices.0
+
+
+$IPTABLES -w -N LocalServices.1
+$IPTABLES -w -A LocalServices.0  -m set --match-set fw-ip dst -j LocalServices.1
+
+$IPTABLES -w -N RULE_3
+
+$IPTABLES -w -A INPUT -p tcp -m tcp  --dport 80  -m conntrack --ctstate NEW  -j RULE_3
+$IPTABLES -w -A INPUT -p tcp -m tcp  --dport 443  -m conntrack --ctstate NEW  -j RULE_3
+$IPTABLES -w -A INPUT -p tcp -m tcp  --dport 4464  -m conntrack --ctstate NEW  -j RULE_3
+
+$IPTABLES -w -A RULE_3  -m limit --limit 20/min -j LOG  --log-level info --log-prefix "RULE 3 -- ACCEPT "
+$IPTABLES -w -A RULE_3  -j ACCEPT
+
+## End of 03-local_services
+

@@ -1,0 +1,36 @@
+# 
+# Rule 1 (global)
+# 
+echo "Rule 1 (global)"
+# 
+# Create and use "fw-self" ipset
+# e.g.:
+# ipset -N fw-self iphash
+# or
+# ipset create fw-self hash:ip
+# 
+# Loop through interfaces and IPs and add each IP:
+# ipset add fw-self 1.1.1.1
+# ipset add fw-self 2.2.2.2
+#
+# Allow FW to talk to itself
+$IPTABLES -w -N TalkToSelf.0
+$IPTABLES -w -A FORWARD  -m set --match-set fw-self src -m conntrack --ctstate NEW  -j TalkToSelf.0
+$IPTABLES -w -N RULE_1
+$IPTABLES -w -A TalkToSelf.0  -m set --match-set fw-self dst -j RULE_1
+$IPTABLES -w -N TalkToSelf.1
+$IPTABLES -w -A INPUT  -m set --match-set fw-self src -m conntrack --ctstate NEW  -j TalkToSelf.1
+$IPTABLES -w -A TalkToSelf.1  -m set --match-set fw-self dst -j RULE_1
+$IPTABLES -w -N TalkToSelf.2
+$IPTABLES -w -A FORWARD -m set --match-set fw-self src -m conntrack --ctstate NEW  -j TalkToSelf.2
+$IPTABLES -w -A TalkToSelf.2  -m set --match-set fw-self dst -j RULE_1
+$IPTABLES -w -N TalkToSelf.3
+$IPTABLES -w -A FORWARD  -m set --match-set fw-self src -m conntrack --ctstate NEW  -j TalkToSelf.3
+$IPTABLES -w -A TalkToSelf.3  -m set --match-set fw-self dst -j RULE_1
+$IPTABLES -w -N TalkToSelf.4
+$IPTABLES -w -A OUTPUT  -m set --match-set fw-self src -j TalkToSelf.4
+$IPTABLES -w -A TalkToSelf.4  -m set --match-set fw-self dst -j RULE_1
+$IPTABLES -w -A RULE_1  -m limit --limit 20/min -j LOG  --log-level info --log-prefix "RULE 1 -- ACCEPT "
+$IPTABLES -w -A RULE_1  -j ACCEPT
+## End of 01-talk_to_self
+

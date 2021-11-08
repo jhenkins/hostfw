@@ -1,0 +1,6 @@
+## Our trusted network ranges
+## Note: All commented lines are ignored by the compile script
+# Site 1 range: 10.20.30.0/24
+10.20.30.0 255.255.255.0
+# Site 2 range: 10.30.40.0/24
+10.30.40.0 255.255.255.0

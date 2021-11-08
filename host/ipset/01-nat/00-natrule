@@ -1,0 +1,9 @@
+## NAT rules
+
+# Rule 0 - NAT outwards
+# PRIVNET maps to "SecNetwork", PRIVPREFIX need to be calculated from "SecNetmask", HOSTIP maps
+# to "IP", column 5 in im-details.csv
+# $IPTABLES -w -t nat -A POSTROUTING -s PRIVNET/PRIVPREFIX -m set ! --match-set irs-ips dst -j SNAT --to-source HOSTIP
+
+## end 00-natrule
+

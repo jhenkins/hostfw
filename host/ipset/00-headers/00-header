@@ -1,0 +1,25 @@
+#!/bin/bash
+
+## Header
+## This section contains the variables and functions used in the main firewall script.
+
+## Vars
+IFS=$'\n\t'			# Make the IFS sensible again...
+CONFDIR="/etc/hostfw"
+IPTABLES=$(which iptables)
+IP6TABLES=$(which ip6tables)
+IP=$(which ip)
+IFCONFIG=$(which ifconfig)
+IPSET=$(which ipset)
+LOGGER=$(which logger)
+MYNAME=$(hostname -s)
+IPCALC=$CONFDIR/ipcalc
+MYVERSION=$(cat $CONFDIR/version.txt)
+
+## State version
+echo
+echo "Running firewall version: $MYVERSION"
+echo
+
+## end 00-header
+

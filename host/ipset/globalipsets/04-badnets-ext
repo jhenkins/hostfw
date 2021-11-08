@@ -1,0 +1,19 @@
+## Our untrusted network ranges
+## Note: All commented lines are ignored by the compile script
+
+# CHINANET-JS-1
+222.184.0.0 255.248.0.0
+# Hacker network
+66.221.0.0 255.255.0.0
+# Hacker network 2
+202.85.59.0 255.255.255.0
+# Hacker network 3
+24.64.253.0 255.255.255.0
+# Spamhaven 1
+204.93.210.0 255.255.255.0
+# Spamhaven 2
+66.132.141.0 255.255.255.0
+# Spamhaven 3
+216.157.78.0 255.255.255.0
+# Spamhaven 4
+66.18.12.0 255.255.255.0

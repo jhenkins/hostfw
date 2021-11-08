@@ -1,0 +1,31 @@
+# 
+# Rule 0 (global)
+# 
+echo "Rule 0 (global)"
+# 
+# Allow ping and traceroute to reach host
+$IPTABLES -w -N MyIcmpChain.0
+
+$IPTABLES -w -A OUTPUT -m conntrack --ctstate NEW  -j MyIcmpChain.0
+$IPTABLES -w -N RULE_0
+$IPTABLES -w -A MyIcmpChain.0 -p icmp  -m icmp  --icmp-type 3  -j RULE_0
+$IPTABLES -w -A MyIcmpChain.0 -p icmp  -m icmp  --icmp-type 0/0   -j RULE_0
+$IPTABLES -w -A MyIcmpChain.0 -p icmp  -m icmp  --icmp-type 8/0   -j RULE_0
+$IPTABLES -w -A MyIcmpChain.0 -p icmp  -m icmp  --icmp-type 11/0   -j RULE_0
+$IPTABLES -w -A MyIcmpChain.0 -p icmp  -m icmp  --icmp-type 11/1   -j RULE_0
+$IPTABLES -w -N MyIcmpChain.1
+$IPTABLES -w -A FORWARD -m conntrack --ctstate NEW  -j MyIcmpChain.0
+$IPTABLES -w -A MyIcmpChain.1 -p icmp  -m icmp  --icmp-type 3  -j RULE_0
+$IPTABLES -w -A MyIcmpChain.1 -p icmp  -m icmp  --icmp-type 0/0   -j RULE_0
+$IPTABLES -w -A MyIcmpChain.1 -p icmp  -m icmp  --icmp-type 8/0   -j RULE_0
+$IPTABLES -w -A MyIcmpChain.1 -p icmp  -m icmp  --icmp-type 11/0   -j RULE_0
+$IPTABLES -w -A MyIcmpChain.1 -p icmp  -m icmp  --icmp-type 11/1   -j RULE_0
+$IPTABLES -w -A INPUT -p icmp  -m icmp  --icmp-type 3  -m conntrack --ctstate NEW  -j RULE_0
+$IPTABLES -w -A INPUT -p icmp  -m icmp  --icmp-type 0/0   -m conntrack --ctstate NEW  -j RULE_0
+$IPTABLES -w -A INPUT -p icmp  -m icmp  --icmp-type 8/0   -m conntrack --ctstate NEW  -j RULE_0
+$IPTABLES -w -A INPUT -p icmp  -m icmp  --icmp-type 11/0   -m conntrack --ctstate NEW  -j RULE_0
+$IPTABLES -w -A INPUT -p icmp  -m icmp  --icmp-type 11/1   -m conntrack --ctstate NEW  -j RULE_0
+$IPTABLES -w -A RULE_0  -m limit --limit 20/min -j LOG  --log-level info --log-prefix "RULE 0 -- ACCEPT "
+$IPTABLES -w -A RULE_0  -j ACCEPT
+## End of 00-all_useful_icmp
+

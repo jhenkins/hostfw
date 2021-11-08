@@ -1,0 +1,57 @@
+#!/bin/sh
+PATH=/bin:/sbin:/usr/bin:/usr/sbin
+export PATH
+
+touch /var/lock/subsys/local
+
+# Check if "/first-boot" exists, and exit routine if it does
+#
+if [[ ! -f /first-boot ]]; then
+	# Check if "/resized" exists, and exit routine if it does
+	if [[ ! -f /resized ]]; then
+
+		# Extend the root partition into max unused space
+		# NOTE: Use parted instead of fdisk!
+		(
+		yum -y install parted
+		sleep 5
+		# Find out partition limits
+		PARTSTART=$(parted /dev/vda unit MB p | grep lvm | awk '{print $2}' | tr -d MB)
+		PARTEND=$(parted /dev/vda unit MB p | grep Disk | awk '{print $3}' | tr -d MB)
+		# Recreate the partition to fill up the entire disk, and power down when done
+		parted /dev/vda rm 2
+		parted /dev/vda mkpart primary ext2 $PARTSTART $PARTEND
+		parted /dev/vda set 2 lvm on
+		sleep 1 && \
+		sync && \
+		sleep 1 && \
+		touch /resized
+		sleep 1
+		) > /tmp/partition-resizing.log
+		/sbin/poweroff
+		exit 0
+	fi
+
+	# Use LVM to resize the physical and logical volumes.
+	(
+	pvresize /dev/vda2
+	sleep 1
+	lvresize -r VolGroup/lv_root -l+100%FREE
+	sleep 1
+	) > /tmp/lvm-resizing.log
+
+        # We don't need stinky puppetsess, precioussssss!
+	chkconfig puppet off
+        service puppet stop
+
+	# Forcibly set the date/time.  Sometimes the build process screws with the time.
+	service ntpd stop
+	ntpdate pool.ntp.org
+	service ntpd start
+
+	# Clean the YUM cache
+	yum clean all
+
+	# Set a flag so that we don't do this again
+	date > /first-boot
+fi
